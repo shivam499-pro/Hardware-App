@@ -1,0 +1,55 @@
+{
+  "home": {
+    "welcome": "Welcome to Manish Hardware",
+    "call_now": "Call Now",
+    "whatsapp_now": "WhatsApp Now",
+    "product_categories": "Product Categories",
+    "why_choose_us": "Why Choose Us?",
+    "quality_products": "Quality Products",
+    "competitive_prices": "Competitive Prices",
+    "fast_delivery": "Fast Delivery",
+    "payment_after_delivery": "Payment After Delivery"
+  },
+  "product": {
+    "price_note": "Prices vary daily. Confirm via call or WhatsApp.",
+    "call_order": "Call Order",
+    "whatsapp_order": "WhatsApp Order",
+    "description": "Description",
+    "technical_specs": "Technical Specifications",
+    "usage_info": "Usage Information"
+  },
+  "quote": {
+    "title": "Request Quote",
+    "subtitle": "Fill in the details below and we'll get back to you with pricing and availability.",
+    "name": "Name",
+    "phone": "Phone Number",
+    "product": "Product",
+    "quantity": "Quantity",
+    "location": "Delivery Location",
+    "submit": "Submit Quote Request",
+    "required_note": "Required fields. We'll contact you via WhatsApp or phone with pricing and delivery details."
+  },
+  "contact": {
+    "title": "Contact & Location",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "address": "Address",
+    "business_hours": "Business Hours",
+    "message_whatsapp": "Message on WhatsApp",
+    "view_map": "View on Map"
+  },
+  "about": {
+    "title": "About Manish Hardware",
+    "story": "Our Story",
+    "offer": "What We Offer",
+    "why_choose": "Why Choose Us?",
+    "experience": "Our Experience",
+    "contact_us": "Contact Us"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "ok": "OK"
+  }
+}
