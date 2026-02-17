@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../navigation';
+import { productService, Product } from '../../../services/api';
 
 type ProductDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProductDetail'>;
 type ProductDetailScreenRouteProp = RouteProp<RootStackParamList, 'ProductDetail'>;
@@ -22,16 +24,26 @@ interface Props {
 
 const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { productId } = route.params;
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock product data - replace with API call
-  const product = {
-    id: productId,
-    name: 'OPC Cement 50kg',
-    brand: 'Shree Cement',
-    image: 'https://via.placeholder.com/300x300?text=Cement',
-    description: 'High quality Ordinary Portland Cement suitable for all construction needs.',
-    technicalSpecs: 'Grade: 43, Packing: 50kg bags, Compressive Strength: 43 MPa',
-    usage: 'Ideal for concrete, mortar, plastering, and general construction work.',
+  useEffect(() => {
+    fetchProduct();
+  }, [productId]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await productService.getProductById(productId);
+      setProduct(data);
+    } catch (err) {
+      setError('Failed to load product details. Please try again.');
+      console.error('Error fetching product:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCallPress = () => {
@@ -39,33 +51,64 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handleWhatsAppPress = () => {
-    navigation.navigate('RequestQuote', {
-      productId: product.id,
-      productName: product.name,
-    });
+    if (product) {
+      const productName = product.translations?.[0]?.name || product.brand;
+      navigation.navigate('RequestQuote', {
+        productId: product.id,
+        productName,
+      });
+    }
   };
+
+  const getProductName = (): string => {
+    return product?.translations?.[0]?.name || product?.brand || 'Unknown Product';
+  };
+
+  const getProductDescription = (): string => {
+    return product?.translations?.[0]?.description || 'No description available.';
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#e74c3c" />
+        <Text style={styles.loadingText}>Loading product details...</Text>
+      </View>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error || 'Product not found'}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchProduct}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={{ uri: product.image }} style={styles.productImage} />
+      <Image source={{ uri: product.imageUrl || 'https://via.placeholder.com/300x300?text=Product' }} style={styles.productImage} />
 
       <View style={styles.content}>
-        <Text style={styles.productName}>{product.name}</Text>
+        <Text style={styles.productName}>{getProductName()}</Text>
         <Text style={styles.productBrand}>{product.brand}</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.sectionText}>{product.description}</Text>
+          <Text style={styles.sectionText}>{getProductDescription()}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Technical Specifications</Text>
-          <Text style={styles.sectionText}>{product.technicalSpecs}</Text>
+          <Text style={styles.sectionText}>{product.technicalSpecs || 'No specifications available.'}</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Usage Information</Text>
-          <Text style={styles.sectionText}>{product.usage}</Text>
+          <Text style={styles.sectionText}>{product.usageInfo || 'No usage information available.'}</Text>
         </View>
 
         <View style={styles.priceSection}>
@@ -100,6 +143,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#7f8c8d',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#e74c3c',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#e74c3c',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   productImage: {
     width: '100%',

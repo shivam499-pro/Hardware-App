@@ -17,6 +17,8 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
+    // Public endpoints - no authentication required
+
     @GetMapping
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllActiveCategories();
@@ -30,5 +32,39 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Admin endpoints would be in a separate controller with security
+    // Admin endpoints - require authentication (configured in SecurityConfig)
+
+    @PostMapping
+    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
+        Category savedCategory = categoryService.saveCategory(category);
+        return ResponseEntity.ok(savedCategory);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category) {
+        Optional<Category> existingCategory = categoryService.getCategoryById(id);
+        if (existingCategory.isPresent()) {
+            category.setId(id);
+            Category updatedCategory = categoryService.saveCategory(category);
+            return ResponseEntity.ok(updatedCategory);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        Optional<Category> existingCategory = categoryService.getCategoryById(id);
+        if (existingCategory.isPresent()) {
+            categoryService.deleteCategory(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Get all active categories ordered by sort order
+    @GetMapping("/ordered")
+    public ResponseEntity<List<Category>> getAllCategoriesOrdered() {
+        List<Category> categories = categoryService.getAllActiveCategoriesOrdered();
+        return ResponseEntity.ok(categories);
+    }
 }

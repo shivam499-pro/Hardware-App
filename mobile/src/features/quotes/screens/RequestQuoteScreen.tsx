@@ -12,6 +12,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../navigation';
+import { quoteService, templateService, configService } from '../../../services/api';
 
 type RequestQuoteScreenNavigationProp = StackNavigationProp<RootStackParamList, 'RequestQuote'>;
 type RequestQuoteScreenRouteProp = RouteProp<RootStackParamList, 'RequestQuote'>;
@@ -67,29 +68,50 @@ const RequestQuoteScreen: React.FC<Props> = ({ navigation, route }) => {
     setLoading(true);
 
     try {
-      // Mock API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Submit quote request to backend
+      const quoteData = {
+        name: form.name,
+        phone: form.phone,
+        productId: productId,
+        quantity: form.quantity,
+        location: form.location,
+        languageCode: 'en', // Default language
+      };
 
-      // Generate WhatsApp message
-      const message = `Hello, I want to inquire about ${form.product} for ${form.quantity}. Name: ${form.name}, Phone: ${form.phone}, Location: ${form.location}`;
+      await quoteService.submitQuoteRequest(quoteData);
 
-      // Open WhatsApp with message
+      // Get WhatsApp number from config and render template
+      let whatsappMessage = `Hello, I want to inquire about ${form.product} for ${form.quantity}. Name: ${form.name}, Phone: ${form.phone}, Location: ${form.location}`;
+      
+      try {
+        const config = await configService.getBusinessConfig();
+        const renderedTemplate = await templateService.renderWhatsAppQuoteTemplate('en', {
+          product: form.product,
+          quantity: form.quantity,
+          name: form.name,
+          location: form.location,
+        });
+        whatsappMessage = renderedTemplate || whatsappMessage;
+      } catch (templateError) {
+        console.log('Using default message format');
+      }
+
+      // Show success message
       Alert.alert(
         'Success',
-        'Quote request submitted successfully! Opening WhatsApp...',
+        'Quote request submitted successfully! We will contact you soon.',
         [
           {
             text: 'OK',
             onPress: () => {
-              // In real app, open WhatsApp with message
-              console.log('WhatsApp message:', message);
               navigation.goBack();
             },
           },
         ]
       );
-    } catch (error) {
-      Alert.alert('Error', 'Failed to submit quote request. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error?.response?.data?.message || 'Failed to submit quote request. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }

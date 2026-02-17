@@ -90,7 +90,24 @@ CREATE TABLE supported_languages (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     code VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,
-    is_default BOOLEAN DEFAULT FALSE
+    is_default BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Admin users table
+CREATE TABLE admin_users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    full_name VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    role VARCHAR(50) DEFAULT 'ADMIN',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
 );
 
 -- Indexes for performance
@@ -121,3 +138,7 @@ INSERT INTO message_templates (type, language_code, template) VALUES ('whatsapp_
 
 INSERT INTO categories (name, description, sort_order) VALUES ('Cement', 'High quality cement for construction', 1);
 INSERT INTO categories (name, description, sort_order) VALUES ('Steel', 'TMT bars and steel products', 2);
+
+-- Default admin user (password: admin123 - BCrypt encoded)
+INSERT INTO admin_users (username, password, email, full_name, is_active, role) VALUES 
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3.eG1H2DkKsQPmPLF9Ei', 'admin@manishhardware.com', 'Administrator', TRUE, 'ADMIN');

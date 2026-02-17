@@ -11,6 +11,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../navigation';
+import { productService, Product } from '../../../services/api';
 
 type CategoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Category'>;
 type CategoryScreenRouteProp = RouteProp<RootStackParamList, 'Category'>;
@@ -20,31 +21,34 @@ interface Props {
   route: CategoryScreenRouteProp;
 }
 
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  image: string;
-}
-
 const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
   const { categoryId, categoryName } = route.params;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Mock data - replace with API call
-    const mockProducts: Product[] = [
-      { id: 1, name: 'OPC Cement 50kg', brand: 'Shree Cement', image: 'https://via.placeholder.com/150?text=Cement' },
-      { id: 2, name: 'TMT Steel Bars 12mm', brand: 'JSW Steel', image: 'https://via.placeholder.com/150?text=Steel' },
-      { id: 3, name: 'Red Clay Bricks', brand: 'Local Brand', image: 'https://via.placeholder.com/150?text=Bricks' },
-    ];
-
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 1000);
+    fetchProducts();
   }, [categoryId]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await productService.getProductsByCategory(categoryId, {
+        page: 0,
+        size: 50,
+        sortBy: 'id',
+        sortDir: 'asc',
+      });
+      setProducts(response.content);
+    } catch (err) {
+      setError('Failed to load products. Please try again.');
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleProductPress = (product: Product) => {
     navigation.navigate('ProductDetail', { productId: product.id });
@@ -54,8 +58,17 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
     console.log('Call for price');
   };
 
-  const handleWhatsAppPress = () => {
-    navigation.navigate('RequestQuote', { productId: undefined, productName: undefined });
+  const handleWhatsAppPress = (product: Product) => {
+    const productName = product.translations?.[0]?.name || product.brand;
+    navigation.navigate('RequestQuote', { productId: product.id, productName });
+  };
+
+  const getProductDisplayName = (product: Product): string => {
+    return product.translations?.[0]?.name || product.brand || 'Unknown Product';
+  };
+
+  const getProductImage = (product: Product): string => {
+    return product.imageUrl || 'https://via.placeholder.com/150?text=Product';
   };
 
   const renderProduct = ({ item }: { item: Product }) => (
@@ -63,9 +76,9 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
       style={styles.productCard}
       onPress={() => handleProductPress(item)}
     >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <Image source={{ uri: getProductImage(item) }} style={styles.productImage} />
       <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productName}>{getProductDisplayName(item)}</Text>
         <Text style={styles.productBrand}>{item.brand}</Text>
         <Text style={styles.priceNote}>Call/WhatsApp for Price</Text>
         <View style={styles.actionButtons}>
@@ -77,7 +90,7 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, styles.whatsappButton]}
-            onPress={handleWhatsAppPress}
+            onPress={() => handleWhatsAppPress(item)}
           >
             <Text style={styles.buttonText}>WhatsApp</Text>
           </TouchableOpacity>
@@ -95,6 +108,17 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchProducts}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -103,6 +127,11 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
         renderItem={renderProduct}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No products found in this category</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -123,6 +152,41 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#7f8c8d',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#e74c3c',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#e74c3c',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#7f8c8d',
+    textAlign: 'center',
   },
   listContainer: {
     padding: 10,

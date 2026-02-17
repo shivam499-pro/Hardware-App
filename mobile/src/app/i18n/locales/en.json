@@ -8,7 +8,8 @@
     "quality_products": "Quality Products",
     "competitive_prices": "Competitive Prices",
     "fast_delivery": "Fast Delivery",
-    "payment_after_delivery": "Payment After Delivery"
+    "payment_after_delivery": "Payment After Delivery",
+    "contact_info": "Contact Information"
   },
   "product": {
     "price_note": "Prices vary daily. Confirm via call or WhatsApp.",
@@ -50,6 +51,11 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "ok": "OK"
+    "ok": "OK",
+    "retry": "Retry",
+    "error_loading": "Failed to load data. Please try again."
+  },
+  "whatsapp": {
+    "greeting": "Hello! I'm interested in your products."
   }
 }

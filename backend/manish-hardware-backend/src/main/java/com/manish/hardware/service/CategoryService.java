@@ -18,6 +18,10 @@ public class CategoryService {
         return categoryRepository.findActiveCategories();
     }
 
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
     public Optional<Category> getCategoryById(Long id) {
         return categoryRepository.findById(id);
     }
@@ -28,5 +32,10 @@ public class CategoryService {
 
     public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
+    }
+
+    // Get all active categories ordered by sort order
+    public List<Category> getAllActiveCategoriesOrdered() {
+        return categoryRepository.findByIsActiveTrueOrderBySortOrderAsc();
     }
 }
