@@ -116,7 +116,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <Image
         source={{ uri: item.imageUrl }}
         style={styles.banner}
-        defaultSource={require('../../../assets/adaptive-icon.png')}
+        defaultSource={require('../../../../assets/adaptive-icon-1.jpeg')}
       />
     </TouchableOpacity>
   );

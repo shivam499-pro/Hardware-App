@@ -33,3 +33,9 @@ target/
 # ========================
 .DS_Store
 Thumbs.db
+
+# ========================
+# Local credentials - NEVER COMMIT
+# ========================
+application-local.properties
+**/application-local.properties

@@ -6,7 +6,7 @@
 // API Configuration
 export const API_CONFIG = {
   BASE_URL: __DEV__ 
-    ? 'http://localhost:8080/api/v1' 
+    ? 'http://172.30.6.148:8080/api/v1' 
     : 'https://api.manishhardware.com/api/v1',
   TIMEOUT: 15000,
   RETRY_COUNT: 3,
