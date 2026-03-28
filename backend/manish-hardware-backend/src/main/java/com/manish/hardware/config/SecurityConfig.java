@@ -55,44 +55,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Swagger UI - public access
-                        .requestMatchers("/swagger-ui.html").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/api-docs/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
-                        // Public endpoints - no authentication required
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/*").permitAll()
-                        .requestMatchers("/api/v1/products").permitAll()
-                        .requestMatchers("/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/banners").permitAll()
-                        .requestMatchers("/api/v1/banners/*").permitAll()
-                        .requestMatchers("/api/v1/quotes").permitAll() // Allow public quote submission
-                        .requestMatchers("/api/v1/config/**").permitAll()
-                        .requestMatchers("/api/v1/config/business").permitAll()
-                        .requestMatchers("/api/v1/config/{key}").permitAll()
-                        .requestMatchers("/api/v1/config/{key}/value").permitAll()
-                        .requestMatchers("/api/v1/config/batch").permitAll()
-                        .requestMatchers("/api/v1/templates/**").permitAll()
-                        .requestMatchers("/api/v1/languages/**").permitAll()
-                        .requestMatchers("/api/v1/languages/default").permitAll()
-                        .requestMatchers("/api/v1/languages/default/code").permitAll()
-                        .requestMatchers("/api/v1/languages/{code}/supported").permitAll()
-                        .requestMatchers("/api/v1/languages/{code}").permitAll()
-
-                        // Admin endpoints - require authentication
-                        .requestMatchers("/api/v1/admin/**").authenticated()
-
-                        // Quote management endpoints - require authentication
-                        .requestMatchers("/api/v1/quotes/**").authenticated()
-
-                        // Every other request requires authentication
-                        .anyRequest().authenticated());
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // Swagger UI
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                // Auth
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                // Products - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                // Categories - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/categories").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                // Banners - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/banners").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/banners/**").permitAll()
+                // Config - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/config/**").permitAll()
+                // Languages - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/languages/**").permitAll()
+                // Templates - fully public
+                .requestMatchers(HttpMethod.GET, "/api/v1/templates/**").permitAll()
+                // Quotes - public submission
+                .requestMatchers(HttpMethod.POST, "/api/v1/quotes").permitAll()
+                // Everything else requires authentication
+                .anyRequest().authenticated()
+            );
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,6 +1,7 @@
 package com.manish.hardware.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,6 +15,7 @@ public class ProductTranslation {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
