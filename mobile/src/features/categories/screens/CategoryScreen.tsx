@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../../navigation';
-import { productService, Product } from '../../../services/api';
+import { productService, Product, configService } from '../../../services/api';
 
 type CategoryScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Category'>;
 type CategoryScreenRouteProp = RouteProp<RootStackParamList, 'Category'>;
@@ -26,9 +27,11 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [businessConfig, setBusinessConfig] = useState<any>(null);
 
   useEffect(() => {
     fetchProducts();
+    fetchBusinessConfig();
   }, [categoryId]);
 
   const fetchProducts = async () => {
@@ -50,12 +53,26 @@ const CategoryScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  const fetchBusinessConfig = async () => {
+    try {
+      const config = await configService.getBusinessConfig();
+      setBusinessConfig(config);
+    } catch (err) {
+      console.error('Error fetching business config:', err);
+    }
+  };
+
   const handleProductPress = (product: Product) => {
     navigation.navigate('ProductDetail', { productId: product.id });
   };
 
-  const handleCallPress = () => {
-    console.log('Call for price');
+  const handleCallPress = async () => {
+    try {
+      const phone = businessConfig?.phone_number || '+9779800000000';
+      await Linking.openURL(`tel:${phone}`);
+    } catch (err) {
+      console.error('Could not open dialer:', err);
+    }
   };
 
   const handleWhatsAppPress = (product: Product) => {
