@@ -37,6 +37,8 @@ const Tab = createBottomTabNavigator();
 
 // Create the Bottom Tab Navigator
 const MainTabs = () => {
+  const cartItemCount = require('react-redux').useSelector((state: any) => state.cart?.items?.length || 0);
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -79,7 +81,12 @@ const MainTabs = () => {
       <Tab.Screen 
         name="CartTab" 
         component={CartScreen} 
-        options={{ title: 'Quote Cart', tabBarLabel: 'Cart' }} 
+        options={{ 
+          title: 'Quote Cart', 
+          tabBarLabel: 'Cart',
+          tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: '#e74c3c' },
+        }} 
       />
       <Tab.Screen 
         name="ProfileTab" 

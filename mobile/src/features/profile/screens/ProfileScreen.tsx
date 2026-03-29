@@ -52,19 +52,30 @@ const ProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const renderQuoteItem = ({ item }: { item: QuoteRequest }) => {
     let statusColor = '#f39c12'; // pending
-    if (item.status === 'contacted') statusColor = '#3498db';
-    if (item.status === 'completed') statusColor = '#2ecc71';
+    let statusIcon = 'time-outline';
+    if (item.status === 'contacted') { statusColor = '#3498db'; statusIcon = 'call-outline'; }
+    if (item.status === 'completed') { statusColor = '#2ecc71'; statusIcon = 'checkmark-circle-outline'; }
+
+    const dateStr = item.createdAt 
+      ? new Date(item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+      : 'N/A';
 
     return (
       <View style={styles.quoteCard}>
         <View style={styles.quoteCardHeader}>
-          <Text style={styles.quoteItemName}>{item.quantity} units</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.quoteItemName}>Product #{item.productId}</Text>
+            <Text style={styles.quoteQuantity}>Qty: {item.quantity} units</Text>
+          </View>
           <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-            <Text style={styles.statusText}>{item.status?.toUpperCase() || 'PENDING'}</Text>
+            <Icon name={statusIcon} size={14} color="#fff" />
+            <Text style={styles.statusText}> {item.status?.toUpperCase() || 'PENDING'}</Text>
           </View>
         </View>
-        <Text style={styles.quoteDetails}>Submitted: {new Date(item.createdAt || '').toLocaleDateString()}</Text>
-        <Text style={styles.quoteDetails}>Delivery: {item.location}</Text>
+        <View style={styles.quoteCardFooter}>
+          <Text style={styles.quoteDetails}>📅 {dateStr}</Text>
+          <Text style={styles.quoteDetails}>📍 {item.location}</Text>
+        </View>
       </View>
     );
   };
@@ -126,12 +137,14 @@ const styles = StyleSheet.create({
   phoneText: { fontSize: 14, color: '#7f8c8d', marginTop: 3 },
   logoutBtn: { padding: 5 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#2c3e50', marginBottom: 15 },
-  quoteCard: { backgroundColor: '#fff', padding: 15, borderRadius: 8, marginBottom: 10, elevation: 1 },
-  quoteCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  quoteCard: { backgroundColor: '#fff', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  quoteCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   quoteItemName: { fontSize: 16, fontWeight: 'bold', color: '#34495e' },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
-  statusText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  quoteDetails: { fontSize: 14, color: '#7f8c8d', marginTop: 2 },
+  quoteQuantity: { fontSize: 13, color: '#7f8c8d', marginTop: 2 },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  statusText: { color: '#fff', fontSize: 11, fontWeight: 'bold' },
+  quoteCardFooter: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
+  quoteDetails: { fontSize: 13, color: '#7f8c8d' },
   emptyBox: { alignItems: 'center', marginTop: 40 },
   emptyText: { color: '#bdc3c7', fontSize: 16 },
 
