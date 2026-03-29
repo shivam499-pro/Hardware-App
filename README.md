@@ -2,12 +2,14 @@
 
 <div align="center">
 
-![Hardware App](https://img.shields.io/badge/React%20Native-0.73.6-blue.svg)
+![React Native](https://img.shields.io/badge/React%20Native-0.81.5-blue.svg)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)
-![Expo](https://img.shields.io/badge/Expo-~50.0.0-black.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Runtime-336791.svg)
+![Expo](https://img.shields.io/badge/Expo-~54.0.33-black.svg)
+![Redux Toolkit](https://img.shields.io/badge/Redux%20Toolkit-2.11-purple.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6.svg)
 
-**A professional mobile application for hardware and construction materials business in Nepal**
+**A professional mobile e-commerce application for hardware and construction materials business in Nepal**
 
 [📱 Download APK](#) | [🌐 Live Demo](#) | [📖 Documentation](#)
 
@@ -20,11 +22,12 @@
 - [✨ Features](#-features)
 - [🏗️ Architecture](#️-architecture)
 - [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Project Structure](#-project-structure)
 - [🚀 Getting Started](#-getting-started)
 - [📱 Screenshots](#-screenshots)
-- [🔧 Installation](#-installation)
 - [📊 Database Setup](#-database-setup)
 - [🌍 Localization](#-localization)
+- [🔐 Security Architecture](#-security-architecture)
 - [🤝 Business Rules](#-business-rules)
 - [📈 Roadmap](#-roadmap)
 - [👥 Contributing](#-contributing)
@@ -34,14 +37,16 @@
 
 ## 🎯 Overview
 
-**Hardware App** is a comprehensive mobile application designed specifically for Manish Hardware, a leading hardware and construction materials supplier in Nepal. The app serves as a digital catalog and ordering platform for individual home builders, contractors, engineers, and construction companies.
+**Hardware App** is a comprehensive mobile e-commerce application designed specifically for Manish Hardware, a leading hardware and construction materials supplier in Nepal. The app serves as a digital catalog, quote management system, and customer portal for individual home builders, contractors, engineers, and construction companies.
 
 ### 🎯 **Key Objectives**
 - ✅ **Digital Product Catalog**: Browse construction materials by category
-- ✅ **WhatsApp Integration**: Direct ordering via WhatsApp messaging
-- ✅ **Phone Call Integration**: One-tap calling for inquiries
+- ✅ **Multi-Item Quote Cart**: Add multiple products and submit bulk quote requests
+- ✅ **Customer Authentication**: Secure login/signup with JWT-based authentication
+- ✅ **Order History Tracking**: View past quote requests with live status updates
+- ✅ **Full-Text Product Search**: Search by product name, brand, or category
+- ✅ **WhatsApp & Phone Integration**: Direct ordering via WhatsApp and phone call
 - ✅ **Bilingual Support**: English and Nepali (नेपाली) languages
-- ✅ **Offline-First**: Works reliably on low-end Android devices
 - ✅ **Payment After Delivery**: Cash-on-delivery business model
 
 ---
@@ -49,18 +54,43 @@
 ## ✨ Features
 
 ### 📱 **Mobile Application**
-- **🏠 Home Screen**: Dynamic banners, quick action buttons, product categories
-- **📂 Category Browsing**: Paginated product listings with search
-- **📋 Product Details**: Technical specifications, usage information
-- **💬 Quote Requests**: Form validation with WhatsApp integration
+
+#### Navigation & Structure
+- **🏠 Home Screen**: Dynamic banners, quick action buttons (Call/WhatsApp), category grid, language toggle
+- **🔍 Search Screen**: Debounced full-text search with category quick-browse chips and "Add to Cart" from results
+- **🛒 Cart Tab**: Multi-item quote cart with item count badge on tab bar
+- **👤 Profile Tab**: Customer login/signup portal and authenticated quote history dashboard
+
+#### Core Features
+- **📂 Category Browsing**: Paginated product listings organized by category
+- **📋 Product Details**: Technical specifications, usage info, and "Add to Quote Cart" action
+- **💬 Quote Requests**: Single-item quote via WhatsApp or bulk multi-item cart checkout
+- **🛒 Bulk Quote Submission**: Add multiple products to cart, submit all at once with a single form
+- **📜 Quote History**: View all past quote requests with color-coded status (Pending / Contacted / Completed)
+- **🔐 Customer Auth**: Secure registration and login using phone number and password
 - **📞 Contact & Location**: Business information with map integration
 - **ℹ️ About Us**: Company history and trust indicators
 
-### 🔐 **Business Compliance**
-- ❌ **No Online Payments**: Only WhatsApp/call ordering
-- ✅ **Payment After Delivery**: Traditional cash-on-delivery
-- ✅ **Dynamic Pricing**: Prices not hardcoded, confirmed via contact
-- ✅ **Configuration-Driven**: All content managed via backend
+#### UX Polish
+- **🔴 Cart Badge**: Live item count displayed on the Cart tab icon
+- **⚡ Auto-Fill Checkout**: Logged-in users get their name, phone, and location auto-filled
+- **🔄 Pull-to-Refresh**: Quote history supports pull-to-refresh
+- **📊 Status Icons**: Quote status badges include contextual icons (⏰ Pending, 📞 Contacted, ✅ Completed)
+
+### 🖥️ **Admin Panel**
+- **📊 Dashboard**: Quote statistics and recent activity
+- **📦 Product Management**: Full CRUD for products with multi-language translations
+- **📂 Category Management**: Create and organize product categories
+- **📋 Quote Management**: View, filter, and update quote request statuses
+- **🎨 Banner Management**: Manage promotional banners
+- **⚙️ Configuration**: Business settings (phone, address, hours)
+- **🌐 Language Management**: Add/manage supported languages and translations
+
+### 🔐 **Security Architecture**
+- **Separate User Tables**: `AdminUser` for dashboard access, `Customer` for mobile app users
+- **Role-Based JWT Tokens**: `ROLE_ADMIN` and `ROLE_CUSTOMER` with separate authentication endpoints
+- **Phone-Verified History**: Customers can only view their own quote history (server-side JWT verification)
+- **Admin Isolation**: Mobile app users can never access admin endpoints
 
 ### 🌐 **Multi-Language Support**
 - 🇺🇸 **English**: Complete English localization
@@ -73,23 +103,25 @@
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Mobile App    │    │     Backend     │    │   Admin Panel   │
-│  (React Native) │◄──►│  (Spring Boot)  │◄──►│    (React)      │
-│                 │    │                 │    │                 │
-│ • Home Screen   │    │ • REST APIs     │    │ • Dashboard     │
-│ • Categories    │    │ • JWT Auth      │    │ • CRUD Ops      │
-│ • Products      │    │ • MySQL DB      │    │ • Content Mgmt  │
-│ • Quotes        │    │ • Localization  │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌──────────────────────┐    ┌──────────────────────┐    ┌──────────────────────┐
+│     Mobile App       │    │       Backend         │    │    Admin Panel       │
+│   (React Native)     │◄──►│    (Spring Boot)      │◄──►│      (React)         │
+│                      │    │                       │    │                      │
+│ • Bottom Tab Nav     │    │ • REST APIs           │    │ • Dashboard          │
+│ • Home / Search      │    │ • Admin JWT Auth      │    │ • CRUD Operations    │
+│ • Cart / Profile     │    │ • Customer JWT Auth   │    │ • Content Management │
+│ • Redux State Mgmt   │    │ • PostgreSQL DB       │    │ • Quote Management   │
+│ • Auth + History     │    │ • Role-Based Security │    │                      │
+└──────────────────────┘    └──────────────────────┘    └──────────────────────┘
 ```
 
 ### 📊 **System Components**
-- **Frontend**: React Native with Expo
-- **Backend**: Spring Boot with JPA
-- **Database**: MySQL with optimized indexing
-- **Admin**: React with Material-UI
-- **Deployment**: Docker + Cloud hosting
+- **Frontend**: React Native 0.81.5 with Expo 54
+- **Backend**: Spring Boot 3.2.0 with JPA/Hibernate
+- **Database**: PostgreSQL with optimized indexing
+- **Admin**: React 18 with Material-UI
+- **State Management**: Redux Toolkit 2.11
+- **Authentication**: JWT with separate Admin/Customer flows
 
 ---
 
@@ -98,13 +130,14 @@
 ### 📱 **Mobile Application**
 ```json
 {
-  "framework": "React Native 0.73.6",
-  "platform": "Expo ~50.0.0",
-  "language": "TypeScript",
-  "state": "Redux Toolkit",
-  "navigation": "React Navigation",
-  "networking": "Axios",
-  "localization": "i18next",
+  "framework": "React Native 0.81.5",
+  "platform": "Expo ~54.0.33",
+  "language": "TypeScript 5.9",
+  "state": "Redux Toolkit 2.11",
+  "navigation": "React Navigation 7 (Stack + Bottom Tabs)",
+  "networking": "Axios 1.13",
+  "localization": "i18next 25",
+  "icons": "react-native-vector-icons (Ionicons)",
   "storage": "AsyncStorage + MMKV"
 }
 ```
@@ -114,11 +147,12 @@
 {
   "framework": "Spring Boot 3.2.0",
   "language": "Java 17",
-  "database": "MySQL 8.0",
+  "database": "PostgreSQL",
   "orm": "JPA/Hibernate",
-  "security": "Spring Security + JWT",
+  "security": "Spring Security + JWT (jjwt 0.12.5)",
   "validation": "Bean Validation",
-  "documentation": "OpenAPI/Swagger"
+  "documentation": "OpenAPI/Swagger (springdoc 2.3)",
+  "utilities": "Lombok"
 }
 ```
 
@@ -136,45 +170,96 @@
 
 ---
 
+## 📁 Project Structure
+
+```
+manish_Hardware/
+├── mobile/                          # React Native Mobile App
+│   ├── App.tsx                      # Root component (Redux Provider)
+│   ├── src/
+│   │   ├── app/                     # App config, i18n, theme
+│   │   │   └── i18n/locales/        # en.json, ne.json translations
+│   │   ├── features/                # Feature modules
+│   │   │   ├── home/                # Home screen with banners & categories
+│   │   │   ├── search/              # Debounced product search + category chips
+│   │   │   ├── cart/                # Cart screen + Checkout bulk submission
+│   │   │   ├── profile/             # Login, Register, Quote History
+│   │   │   ├── categories/          # Category listing screen
+│   │   │   ├── products/            # Product detail + Add to Cart
+│   │   │   ├── quotes/              # Single-item quote request form
+│   │   │   ├── contact/             # Business contact & map
+│   │   │   └── about/               # About us screen
+│   │   ├── navigation/              # Stack + Bottom Tab navigators
+│   │   ├── services/api/            # Axios API client + service modules
+│   │   ├── store/                   # Redux store configuration
+│   │   │   └── slices/              # appSlice, authSlice, cartSlice, etc.
+│   │   └── types/                   # TypeScript type definitions
+│   └── package.json
+│
+├── backend/manish-hardware-backend/ # Spring Boot Backend
+│   └── src/main/java/com/manish/hardware/
+│       ├── config/                  # SecurityConfig, CORS
+│       ├── controller/              # REST API controllers
+│       │   ├── AuthController        # Admin authentication
+│       │   ├── CustomerAuthController # Customer login/register
+│       │   ├── ProductController      # Product CRUD
+│       │   ├── CategoryController     # Category CRUD
+│       │   ├── QuoteRequestController # Quote management + phone verification
+│       │   ├── BannerController       # Banner management
+│       │   └── ...                    # Config, Language, Template controllers
+│       ├── model/                   # JPA entities
+│       │   ├── AdminUser             # Admin users (dashboard)
+│       │   ├── Customer              # Mobile app customers (separate table)
+│       │   ├── Product               # Products with translations
+│       │   ├── Category              # Product categories
+│       │   ├── QuoteRequest          # Quote requests with status tracking
+│       │   └── ...                   # Banner, AppConfig, etc.
+│       ├── repository/              # Spring Data JPA repositories
+│       ├── security/                # JWT provider, filters, UserDetailsService
+│       ├── service/                 # Business logic services
+│       └── dto/                     # Data Transfer Objects
+│
+├── admin/                           # React Admin Panel
+├── docs/                            # Documentation
+└── README.md
+```
+
+---
+
 ## 🚀 Getting Started
 
 ### 📋 **Prerequisites**
 - Node.js 18+
 - Java 17+
-- MySQL 8.0+
-- Android Studio (for Android development)
+- PostgreSQL (or H2 for testing)
+- Android Studio / Expo Go app (for Android development)
 - Xcode (for iOS development, macOS only)
 
 ### 🏃‍♂️ **Quick Start**
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/hardware-app.git
-   cd hardware-app
+   git clone https://github.com/shivam499-pro/Hardware-App.git
+   cd Hardware-App
    ```
 
-2. **Setup Mobile App**
+2. **Setup Backend**
    ```bash
-   cd mobile
-   npm install
-   npm start
-   ```
-
-3. **Setup Backend**
-   ```bash
-   cd ../backend/manish-hardware-backend
+   cd backend/manish-hardware-backend
    mvn clean install
    mvn spring-boot:run
    ```
 
-4. **Setup Database**
-   ```sql
-   mysql -u root -p < backend/schema.sql
+3. **Setup Mobile App**
+   ```bash
+   cd mobile
+   npm install
+   npx expo start
    ```
 
-5. **Setup Admin Panel**
+4. **Setup Admin Panel**
    ```bash
-   cd ../admin
+   cd admin
    npm install
    npm start
    ```
@@ -188,87 +273,43 @@
 ### 🏠 Home Screen
 <img src="screenshots/home.png" width="300" alt="Home Screen">
 
-### 📂 Categories
-<img src="screenshots/categories.png" width="300" alt="Categories">
+### 🔍 Search
+<img src="screenshots/search.png" width="300" alt="Search Screen">
+
+### 🛒 Quote Cart
+<img src="screenshots/cart.png" width="300" alt="Cart Screen">
+
+### 👤 Profile & Quote History
+<img src="screenshots/profile.png" width="300" alt="Profile Screen">
 
 ### 📋 Product Details
 <img src="screenshots/product.png" width="300" alt="Product Details">
-
-### 💬 Quote Request
-<img src="screenshots/quote.png" width="300" alt="Quote Request">
 
 </div>
 
 ---
 
-## 🔧 Installation
-
-### 📱 **Mobile App Setup**
-```bash
-# Install dependencies
-npm install
-
-# Install Expo CLI globally
-npm install -g @expo/cli
-
-# Start development server
-npm start
-
-# Run on Android
-npm run android
-
-# Run on iOS (macOS only)
-npm run ios
-```
-
-### ⚙️ **Backend Setup**
-```bash
-# Install dependencies
-mvn clean install
-
-# Run the application
-mvn spring-boot:run
-
-# Build for production
-mvn clean package
-```
-
-### 🖥️ **Admin Panel Setup**
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm start
-
-# Build for production
-npm run build
-```
-
----
-
 ## 📊 Database Setup
 
-### 🗄️ **MySQL Configuration**
+### 🗄️ **PostgreSQL Configuration**
 ```sql
 -- Create database
 CREATE DATABASE manish_hardware;
 
--- Run schema
-SOURCE backend/schema.sql;
-
--- Sample data insertion
-INSERT INTO categories (name, description) VALUES
-('Cement', 'High quality cement for construction'),
-('Steel', 'TMT bars and steel products');
+-- The schema is auto-generated by JPA/Hibernate
+-- Tables created automatically: admin_users, customers, products, categories,
+-- quote_requests, banners, app_configs, supported_languages, etc.
 ```
 
 ### 🔧 **Application Properties**
 ```properties
 # Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/manish_hardware
+spring.datasource.url=jdbc:postgresql://localhost:5432/manish_hardware
 spring.datasource.username=your_username
 spring.datasource.password=your_password
+
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update
 
 # JWT Configuration
 app.jwt.secret=your-secret-key-here
@@ -291,9 +332,30 @@ mobile/src/app/i18n/locales/
 ```
 
 ### 🔄 **Language Switching**
-- In-app language toggle
+- In-app language toggle on Home Screen
 - Persistent language selection
-- Backend-driven translations
+- Backend-driven product translations
+
+---
+
+## 🔐 Security Architecture
+
+### 🏛️ **Dual Authentication System**
+
+| Feature | Admin Users | Customer Users |
+|---------|-------------|----------------|
+| **Database Table** | `admin_users` | `customers` |
+| **Login Identifier** | Username | Phone Number |
+| **API Endpoint** | `/api/v1/auth/**` | `/api/v1/customer-auth/**` |
+| **JWT Role** | `ROLE_ADMIN` | `ROLE_CUSTOMER` |
+| **Access** | Full dashboard + API | Own quote history only |
+
+### 🛡️ **Quote History Protection**
+When a customer requests their quote history via `GET /api/v1/quotes/phone/{phone}`, the server:
+1. Extracts the JWT token from the request
+2. Verifies the caller's phone matches the `{phone}` parameter
+3. Returns `403 Forbidden` if someone tries to view another customer's data
+4. Admins bypass this check and can view all quotes
 
 ---
 
@@ -303,12 +365,12 @@ mobile/src/app/i18n/locales/
 - ❌ No online payments accepted
 - ✅ Payment collected after delivery
 - ✅ Cash-on-delivery model
-- ✅ Prices confirmed via contact
+- ✅ Prices confirmed via contact (dynamic pricing)
 
 ### 📞 **Communication Channels**
 - 📱 **WhatsApp**: Primary ordering channel
 - 📞 **Phone Call**: Direct contact for inquiries
-- 📧 **No Email**: Traditional communication preferred
+- 🛒 **In-App Cart**: Bulk quote requests submitted to backend
 
 ### 🎯 **Target Users**
 - 👷 Individual home builders
@@ -321,19 +383,37 @@ mobile/src/app/i18n/locales/
 
 ## 📈 Roadmap
 
-### 🚀 **Version 1.0** (Current)
-- ✅ Mobile app with core features
-- ✅ Backend API with authentication
-- ✅ Admin panel for content management
-- ✅ Bilingual localization
-- ✅ WhatsApp integration
+### ✅ **Phase 1 — Navigation & Structure** (Completed)
+- Bottom Tab Navigator (Home, Search, Cart, Profile)
+- Stack-based screen navigation for detail screens
+
+### ✅ **Phase 2 — Quote Cart System** (Completed)
+- Redux-powered multi-item quote cart
+- Bulk checkout with "Loop & Submit" to backend
+- Cart item management (add, remove, update quantity)
+
+### ✅ **Phase 3 — Customer Authentication** (Completed)
+- Dedicated `Customer` database table (isolated from Admin)
+- JWT-based login/signup via phone number
+- Authenticated quote history with server-side phone verification
+- Auto-fill checkout form for logged-in users
+
+### ✅ **Phase 4 — Search & Polish** (Completed)
+- Full-text product search with 400ms debounce
+- Category quick-browse chips
+- Live cart badge on tab icon
+- Enhanced quote history cards with status icons
 
 ### 🔮 **Future Enhancements**
-- 🔄 **Inventory Sync**: Real-time stock management
+- 🔒 **Login Persistence**: Save auth token to device storage
+- 📞 **Real Call/WhatsApp**: Native phone dialing and WhatsApp deep links
+- 🎨 **Splash Screen**: Branded loading animation
+- ⏳ **Skeleton Loading**: Shimmer placeholders instead of spinners
+- 📴 **Offline Mode**: Friendly "No Internet" handling
+- 🌙 **Dark Mode**: System-aware dark theme toggle
+- 🔔 **Push Notifications**: Quote status change alerts
 - 📍 **GPS Tracking**: Delivery location optimization
 - 📊 **Analytics**: Sales and customer insights
-- 🔔 **Push Notifications**: Order updates
-- 📱 **Multi-branch**: Support for multiple locations
 - 💳 **Payment Integration**: Future payment options
 
 ---
@@ -351,7 +431,8 @@ We welcome contributions! Please follow these steps:
 ### 📝 **Development Guidelines**
 - Follow existing code style
 - Write meaningful commit messages
-- Update documentation
+- Run `npx tsc --noEmit` before committing (mobile)
+- Run `mvn clean compile` before committing (backend)
 - Test on multiple devices
 - Ensure localization coverage
 
