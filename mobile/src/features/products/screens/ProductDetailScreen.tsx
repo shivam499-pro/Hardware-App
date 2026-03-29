@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import { RootStackParamList } from '../../../navigation';
 import { productService, Product } from '../../../services/api';
+import { addToCart } from '../../../store/slices/cartSlice';
 
 type ProductDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ProductDetail'>;
 type ProductDetailScreenRouteProp = RouteProp<RootStackParamList, 'ProductDetail'>;
@@ -24,6 +26,7 @@ interface Props {
 
 const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
   const { productId } = route.params;
+  const dispatch = useDispatch();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +60,19 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
         productId: product.id,
         productName,
       });
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (product) {
+      const productName = getProductName();
+      dispatch(addToCart({
+        productId: product.id,
+        productName: productName,
+        imageUrl: product.imageUrl,
+        quantity: '1', // Default quantity
+      }));
+      Alert.alert('Added to Cart', `${productName} has been added to your quote cart.`);
     }
   };
 
@@ -118,6 +134,15 @@ const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.deliveryNote}>
             Payment will be collected AFTER items are delivered at your location.
           </Text>
+        </View>
+
+        <View style={styles.cartButtonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.cartButton]}
+            onPress={handleAddToCart}
+          >
+            <Text style={styles.buttonText}>Add to Quote Cart</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.actionButtons}>
@@ -229,6 +254,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#856404',
     fontWeight: 'bold',
+  },
+  cartButtonContainer: {
+    marginTop: 20,
+    marginBottom: 5,
+  },
+  cartButton: {
+    backgroundColor: '#34495e',
   },
   actionButtons: {
     flexDirection: 'row',

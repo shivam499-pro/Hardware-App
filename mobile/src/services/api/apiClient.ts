@@ -11,12 +11,21 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+import { store } from '../../store';
+
 // Request interceptor for adding auth token
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // Add language header
     const language = await AsyncStorage.getItem('language') || 'en';
     config.headers['Accept-Language'] = language;
+    
+    // Auth token injection
+    const state = store.getState();
+    const token = state.auth.token;
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     
     return config;
   },

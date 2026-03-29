@@ -168,9 +168,26 @@ public class QuoteRequestController {
         return ResponseEntity.ok(quotes);
     }
 
-    // Get quote requests by phone (admin endpoint)
+    // Get quote requests by phone (admin & customer endpoint)
     @GetMapping("/phone/{phone}")
-    public ResponseEntity<List<QuoteRequest>> getQuoteRequestsByPhone(@PathVariable String phone) {
+    public ResponseEntity<?> getQuoteRequestsByPhone(@PathVariable String phone) {
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        
+        if (auth != null) {
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPER_ADMIN"));
+            boolean isCustomer = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
+
+            if (isCustomer && !isAdmin) {
+                if (!auth.getName().equals(phone)) {
+                    java.util.Map<String, String> error = new java.util.HashMap<>();
+                    error.put("error", "Access Denied: You can only view your own quote history.");
+                    return ResponseEntity.status(403).body(error);
+                }
+            }
+        }
+
         List<QuoteRequest> quotes = quoteRequestService.getQuoteRequestsByPhone(phone);
         return ResponseEntity.ok(quotes);
     }

@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 // Auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/customer-auth/**").permitAll()
                 // Products - fully public
                 .requestMatchers(HttpMethod.GET, "/api/v1/products").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()

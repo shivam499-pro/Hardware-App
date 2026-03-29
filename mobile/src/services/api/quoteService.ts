@@ -130,4 +130,10 @@ export const quoteService = {
     const response = await apiClient.post<QuoteRequest[]>('/quotes/statuses', statuses);
     return response.data;
   },
+
+  // Customer: Get quote history by phone
+  getCustomerQuotesByPhone: async (phone: string): Promise<QuoteRequest[]> => {
+    const response = await apiClient.get<QuoteRequest[]>(`/quotes/phone/${phone}`);
+    return response.data;
+  },
 };

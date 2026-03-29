@@ -105,4 +105,15 @@ export const authService = {
     const response = await apiClient.get<Partial<AdminUser>>(`/auth/users/by-email/${email}`);
     return response.data;
   },
+
+  // --- CUSTOMER APIs ---
+  customerLogin: async (credentials: any): Promise<any> => {
+    const response = await apiClient.post('/customer-auth/login', credentials);
+    return response.data;
+  },
+  
+  customerRegister: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/customer-auth/register', data);
+    return response.data;
+  },
 };
